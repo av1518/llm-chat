@@ -9,6 +9,7 @@ from deepgram import (
     DeepgramClientOptions,
     PrerecordedOptions,
     FileSource,
+    SpeakOptions,
 )
 import httpx
 
@@ -120,5 +121,50 @@ if final_prompt:
         response = st.write_stream(
             stream_content("http://localhost:11434/api/chat", request_data)
         )
+        deepgram: DeepgramClient = DeepgramClient(DEEPGRAM_API_KEY)
+        # Configure the TTS
+        options = SpeakOptions(
+            model="aura-luna-en", encoding="linear16", container="wav"
+        )
+        # Unique identifier for the audio response file
+        id_ = str(time.time())
+        # Call the save method on the speak property
+        _ = deepgram.speak.v("1").save(
+            f"audio_response{id_}.wav", {"text": response}, options
+        )
+        # Display audio using streamlit
+        with open(f"audio_response{id_}.wav", "rb") as file:
+            audio_bytes = file.read()
+
+        st.audio(audio_bytes, format="audio/wav")
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
+
+    # ###
+    # # Configure the TTS
+
+    # # Make streaming request to ollama
+    # with st.chat_message("assistant"):
+    #     request_data["messages"] = st.session_state.messages
+    #     # Generate a text response first
+    #     response = st.write_stream(
+    #         stream_content("http://localhost:11434/api/chat", request_data)
+    #     )
+    #     deepgram: DeepgramClient = DeepgramClient(DEEPGRAM_API_KEY)
+    #     # Configure the TTS
+    #     options = SpeakOptions(
+    #         model="aura-luna-en", encoding="linear16", container="wav"
+    #     )
+    #     # Unique identifier for the audio response file
+    #     id_ = str(time.time())
+    #     # Call the save method on the speak property
+    #     _ = deepgram.speak.v("1").save(
+    #         f"audio_response{id_}.wav", {"text": response}, options
+    #     )
+    #     # Display audio using streamlit
+    #     with open(f"audio_response{id_}.wav", "rb") as file:
+    #         audio_bytes = file.read()
+
+    #     st.audio(audio_bytes, format="audio/wav")
+    # # Add assistant response to chat history
+    # st.session_state.messages.append({"role": "assistant", "content": response})
