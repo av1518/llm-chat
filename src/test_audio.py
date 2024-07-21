@@ -73,23 +73,40 @@ for message in st.session_state.messages:
 
 request_data = {"model": "llama3", "messages": []}
 
-# Accept user input or record audio
+# Accept user input
+if prompt := st.chat_input("What is up?", key="user_prompt"):
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    # Display user message in chat message container
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Make streaming request to ollama
+    with st.chat_message("assistant"):
+        request_data["messages"] = st.session_state.messages
+        response = st.write_stream(
+            stream_content("http://localhost:11434/api/chat", request_data)
+        )
+    # Add assistant response to chat history
+    st.session_state.messages.append({"role": "assistant", "content": response})
+
+
 audio = audiorecorder("Record", "Stop")
-prompt = st.chat_input("What is up?", key="user_prompt")
+prompt = st.chat_input("What is up?", key="another_prompt")
 
 final_prompt = None
 if prompt:
     final_prompt = prompt
 elif audio:
     # using deepgram to transcribe audio
-    # add unique id to the audio file in case the user wants to keep it
+    # add unique id to the audio file in case the use wants to keep it
     id_ = str(time.time())
-    audio.export(f"data/audio{id_}.wav", format="wav")
+    audio.export(f"audio{id_}.wav", format="wav")
 
-    with open(f"data/audio{id_}.wav", "rb") as file:
+    with open(f"audio{id_}.wav", "rb") as file:
         buffer_data = file.read()
 
-    # deepgram config and API keys
+    # deepgram confid and api keys
     config: DeepgramClientOptions = DeepgramClientOptions()
     deepgram: DeepgramClient = DeepgramClient(DEEPGRAM_API_KEY, config)
 
@@ -103,22 +120,7 @@ elif audio:
         payload, options, timeout=httpx.Timeout(300.0, connect=10.0)
     )
 
-    # retrieve the fully punctuated response from the raw data
+    # retrieve the fully punctuated response fromt the raw data
     final_prompt = str(
         response["results"]["channels"][0]["alternatives"][0]["transcript"]
     )
-
-# Add user or audio-transcribed prompt to chat history
-if final_prompt:
-    st.session_state.messages.append({"role": "user", "content": final_prompt})
-    with st.chat_message("user"):
-        st.markdown(final_prompt)
-
-    # Make streaming request to ollama
-    with st.chat_message("assistant"):
-        request_data["messages"] = st.session_state.messages
-        response = st.write_stream(
-            stream_content("http://localhost:11434/api/chat", request_data)
-        )
-    # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
