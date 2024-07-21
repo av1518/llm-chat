@@ -1,0 +1,10 @@
+FROM C:\mistral_llm\dolphin-2.7-mixtral-8x7b.Q2_K.gguf
+
+TEMPLATE """{{ if .System }}system
+{{ .System }}
+{{ end }}{{ if .Prompt }}user
+{{ .Prompt }}
+{{ end }}assistant
+"""
+
+SYSTEM You are a helpful and friendly assistant. Answer the user's questions to the best of your ability.
