@@ -23,7 +23,6 @@ def stream_content(url, data):
     :param url: The URL to which the POST request is made.
     :param data: A dictionary or JSON string to be sent in the body of the POST request.
     """
-    # Specify that the request bodyu will be JSON
     headers = {"Content-Type": "application/json"}
 
     # If data is a dictionary, convert it to a JSON string
@@ -37,18 +36,17 @@ def stream_content(url, data):
 
         # Process the stream
         for chunk in response.iter_lines():
-            # check if chunk is not empty
             if chunk:
                 # Decode chunk from bytes to string
                 decoded_chunk = chunk.decode("utf-8")
                 try:
-
                     # Convert string to JSON
                     json_chunk = json.loads(decoded_chunk)
 
                     # if the model is done generating, return
-                    if json_chunk["done"] == True:
+                    if json_chunk.get("done") == True:
                         return
+
                     # Yield the 'content' part
                     yield json_chunk["message"]["content"]
                 except json.JSONDecodeError:
