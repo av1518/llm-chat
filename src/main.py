@@ -23,6 +23,7 @@ def stream_content(url, data):
     :param url: The URL to which the POST request is made.
     :param data: A dictionary or JSON string to be sent in the body of the POST request.
     """
+    # Specify that the request bodyu will be JSON
     headers = {"Content-Type": "application/json"}
 
     # If data is a dictionary, convert it to a JSON string
@@ -36,18 +37,22 @@ def stream_content(url, data):
 
         # Process the stream
         for chunk in response.iter_lines():
+            # check if chunk is not empty
             if chunk:
                 # Decode chunk from bytes to string
                 decoded_chunk = chunk.decode("utf-8")
+                try:
 
-                # Convert string to JSON
-                json_chunk = json.loads(decoded_chunk)
+                    # Convert string to JSON
+                    json_chunk = json.loads(decoded_chunk)
 
-                # if the model is done generating, return
-                if json_chunk["done"] == True:
-                    return
-                # Yield the 'content' part
-                yield json_chunk["message"]["content"]
+                    # if the model is done generating, return
+                    if json_chunk["done"] == True:
+                        return
+                    # Yield the 'content' part
+                    yield json_chunk["message"]["content"]
+                except json.JSONDecodeError:
+                    continue
 
 
 style = """
@@ -63,7 +68,7 @@ iframe{
 
 st.markdown(style, unsafe_allow_html=True)
 
-# Initialize chat history
+# Initialise chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -72,11 +77,12 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# Placeholder dictionary for requestingf data
 request_data = {"model": "llama3", "messages": []}
 
 # Accept user input or record audio
 audio = audiorecorder("Record", "Stop")
-prompt = st.chat_input("What is up?", key="user_prompt")
+prompt = st.chat_input("What's up?", key="user_prompt")
 
 final_prompt = None
 if prompt:
@@ -111,18 +117,23 @@ elif audio:
 
 # Add user or audio-transcribed prompt to chat history
 if final_prompt:
+    # Add the 'final_prompt' to the chat history
     st.session_state.messages.append({"role": "user", "content": final_prompt})
+    # Display the 'final_prompt' in the chat
     with st.chat_message("user"):
         st.markdown(final_prompt)
 
     # Make streaming request to ollama
     with st.chat_message("assistant"):
-        request_data["messages"] = st.session_state.messages
+        request_data["messages"] = (
+            st.session_state.messages
+        )  # Add all the messages to the request data
         response = st.write_stream(
             stream_content("http://localhost:11434/api/chat", request_data)
         )
-        deepgram: DeepgramClient = DeepgramClient(DEEPGRAM_API_KEY)
+
         # Configure the TTS
+        deepgram: DeepgramClient = DeepgramClient(DEEPGRAM_API_KEY)
         options = SpeakOptions(
             model="aura-luna-en", encoding="linear16", container="wav"
         )
@@ -130,43 +141,12 @@ if final_prompt:
         id_ = str(time.time())
         # Call the save method on the speak property
         _ = deepgram.speak.v("1").save(
-            f"audio_response{id_}.wav", {"text": response}, options
+            f"data/audio_response{id_}.wav", {"text": response}, options
         )
         # Display audio using streamlit
-        with open(f"audio_response{id_}.wav", "rb") as file:
+        with open(f"data/audio_response{id_}.wav", "rb") as file:
             audio_bytes = file.read()
 
         st.audio(audio_bytes, format="audio/wav")
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
-
-    # ###
-    # # Configure the TTS
-
-    # # Make streaming request to ollama
-    # with st.chat_message("assistant"):
-    #     request_data["messages"] = st.session_state.messages
-    #     # Generate a text response first
-    #     response = st.write_stream(
-    #         stream_content("http://localhost:11434/api/chat", request_data)
-    #     )
-    #     deepgram: DeepgramClient = DeepgramClient(DEEPGRAM_API_KEY)
-    #     # Configure the TTS
-    #     options = SpeakOptions(
-    #         model="aura-luna-en", encoding="linear16", container="wav"
-    #     )
-    #     # Unique identifier for the audio response file
-    #     id_ = str(time.time())
-    #     # Call the save method on the speak property
-    #     _ = deepgram.speak.v("1").save(
-    #         f"audio_response{id_}.wav", {"text": response}, options
-    #     )
-    #     # Display audio using streamlit
-    #     with open(f"audio_response{id_}.wav", "rb") as file:
-    #         audio_bytes = file.read()
-
-    #     st.audio(audio_bytes, format="audio/wav")
-    # # Add assistant response to chat history
-    # st.session_state.messages.append({"role": "assistant", "content": response})
-
-# Save chat history
