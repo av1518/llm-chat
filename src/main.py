@@ -12,7 +12,7 @@ from deepgram import (
 from utils import stream_content
 import warnings
 
-# Suppress specific deprecation warnings
+# Suppress specific deprecation warnings (deepgram v("1"))
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 DEEPGRAM_API_KEY = "2c4355877a0cc0c302be01872780f27cf28cee94"
@@ -26,7 +26,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Placeholderf dictionary for requesting data
+# Placeholderf dictionary for requesting data to ollama API
 request_data = {"model": "llama3", "messages": []}
 
 # Accept user input or record audio
@@ -79,9 +79,8 @@ if final_prompt:
 
     # Make streaming request to ollama
     with st.chat_message("assistant"):
-        request_data["messages"] = (
-            st.session_state.messages
-        )  # Add all the messages to the request data
+        # Add all the messages to the request data
+        request_data["messages"] = st.session_state.messages
         response = st.write_stream(
             stream_content("http://localhost:11434/api/chat", request_data)
         )

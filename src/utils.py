@@ -6,9 +6,44 @@ def stream_content(url, data):
     """
     Make a streaming POST request and yield the 'content' part of each JSON response as they arrive.
 
-    :param url: The URL to which the POST request is made.
-    :param data: A dictionary or JSON string to be sent in the body of the POST request.
+    This function sends a POST request to the specified URL with the given data. The request is made
+    in a streaming fashion, meaning that processes the response incrementally as data arrives.
+    The function yields the 'content' field from the 'message' part of each JSON response chunk received.
+
+    Parameters:
+    -----------
+    url : str
+        The URL to which the POST request is made.
+    data : dict or str
+        A dictionary or JSON string to be sent in the body of the POST request. If a dictionary is provided,
+        it is converted to a JSON string before sending the request.
+
+    Yields:
+    -------
+    str
+        The 'content' field from the 'message' part of each JSON response chunk received.
+
+    Raises:
+    -------
+    requests.exceptions.RequestException
+        If the POST request fails or returns a bad status code.
+
+    Notes:
+    ------
+    - This function requires the `requests` and `json` modules to be imported.
+    - The response is processed in a streaming manner using `iter_lines()` which avoids loading the entire
+      response into memory at once.
+    - If the JSON decoding fails for any chunk, the function silently continues to the next chunk.
+    - The function exits if the 'done' field in the JSON response is `True`.
+
+    Example:
+    --------
+    >>> url = "http://example.com/stream"
+    >>> data = {"key": "value"}
+    >>> for content in stream_content(url, data):
+    >>>     print(content)
     """
+    # Set the content type to JSON
     headers = {"Content-Type": "application/json"}
 
     # If data is a dictionary, convert it to a JSON string
