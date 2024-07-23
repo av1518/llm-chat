@@ -10,6 +10,10 @@ from deepgram import (
     SpeakOptions,
 )
 from utils import stream_content
+import warnings
+
+# Suppress specific deprecation warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 DEEPGRAM_API_KEY = "2c4355877a0cc0c302be01872780f27cf28cee94"
 
@@ -55,7 +59,7 @@ elif audio:
 
     options: PrerecordedOptions = PrerecordedOptions(model="nova-2", smart_format=True)
 
-    response = deepgram.listen.prerecorded.v("1").transcribe_file(
+    response = deepgram.listen.rest.v("1").transcribe_file(
         payload, options, timeout=httpx.Timeout(300.0, connect=10.0)
     )
 
