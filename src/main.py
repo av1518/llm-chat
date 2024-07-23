@@ -59,13 +59,13 @@ elif audio:
 
     options: PrerecordedOptions = PrerecordedOptions(model="nova-2", smart_format=True)
 
-    response = deepgram.listen.rest.v("1").transcribe_file(
+    transcription = deepgram.listen.rest.v("1").transcribe_file(
         payload, options, timeout=httpx.Timeout(300.0, connect=10.0)
     )
 
     # retrieve the fully punctuated response from the raw data
     final_prompt = str(
-        response["results"]["channels"][0]["alternatives"][0]["transcript"]
+        transcription["results"]["channels"][0]["alternatives"][0]["transcript"]
     )
     print("audio transcribed to final_prompt = ", final_prompt)
 

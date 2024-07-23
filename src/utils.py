@@ -28,20 +28,6 @@ def stream_content(url, data):
     requests.exceptions.RequestException
         If the POST request fails or returns a bad status code.
 
-    Notes:
-    ------
-    - This function requires the `requests` and `json` modules to be imported.
-    - The response is processed in a streaming manner using `iter_lines()` which avoids loading the entire
-      response into memory at once.
-    - If the JSON decoding fails for any chunk, the function silently continues to the next chunk.
-    - The function exits if the 'done' field in the JSON response is `True`.
-
-    Example:
-    --------
-    >>> url = "http://example.com/stream"
-    >>> data = {"key": "value"}
-    >>> for content in stream_content(url, data):
-    >>>     print(content)
     """
     # Set the content type to JSON
     headers = {"Content-Type": "application/json"}

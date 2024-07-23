@@ -18,9 +18,9 @@ conda activate llm
 
 We use [Ollama](https://github.com/ollama/ollama/tree/main) to run LLMs, which serves as the "backend" for the chat interface. Ollama comes with a ready-to-go bare bones command line interface for chatting with local LLMs as well as a local API that we can request from our script to generate responses. 
 
-We use the preview version for windows, found [here](https://ollama.com/download/windows).
+We use the preview version for windows, found [here](https://ollama.com/download/windows). The first time the API is called it will download LLama3 (around 8GB). 
 
-
+To transcribe the audio, we first export it into a wav file and then use deepgram’s python sdk to transcribe the local file. In order to use Deepgram’s API, create an API key from the dashboard [page](https://deepgram.com/product/text-to-speech). 
 
 ## Creating a chat
 We use Streamlit to create the web-based front-end UI. It is an open source python tool for ML applications. To begin a chat session simply run the following from the root of the repository:
@@ -28,7 +28,7 @@ We use Streamlit to create the web-based front-end UI. It is an open source pyth
 ```bash
 streamlit run src/main.py
 ```
-This will open the web UI on the browser. 
+This will open the web UI on the browser. To quit a chat session use `Ctrl+C` on the terminal.
 
 ## Contributing
 
