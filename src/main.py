@@ -13,18 +13,19 @@ from utils import stream_content
 
 DEEPGRAM_API_KEY = "2c4355877a0cc0c302be01872780f27cf28cee94"
 
-style = """
-<style>
-iframe{
-    position: fixed;
-    bottom: -25px;
-    height: 70px;
-    z-index: 9;
-}
-</style>
-"""
+# style = """
+# <style>
+# iframe{
+#     position: fixed;
+#     bottom: -25px;
+#     height: 70px;
+#     z-index: 9;
+# }
+# </style>
+# """
+
+# st.markdown(style, unsafe_allow_html=True)
 print("i'm at the start")
-st.markdown(style, unsafe_allow_html=True)
 
 # Initialise chat history
 if "messages" not in st.session_state:
@@ -77,6 +78,7 @@ elif len(audio) > 0:
     final_prompt = str(
         response["results"]["channels"][0]["alternatives"][0]["transcript"]
     )
+    print("audio transcribed to final_prompt = ", final_prompt)
 
 # Add user or audio-transcribed prompt to chat history
 if final_prompt:
