@@ -13,20 +13,6 @@ from utils import stream_content
 
 DEEPGRAM_API_KEY = "2c4355877a0cc0c302be01872780f27cf28cee94"
 
-# style = """
-# <style>
-# iframe{
-#     position: fixed;
-#     bottom: -25px;
-#     height: 70px;
-#     z-index: 9;
-# }
-# </style>
-# """
-
-# st.markdown(style, unsafe_allow_html=True)
-print("i'm at the start")
-
 # Initialise chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -36,19 +22,20 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Placeholder dictionary for requestingf data
+# Placeholderf dictionary for requesting data
 request_data = {"model": "llama3", "messages": []}
 
 # Accept user input or record audio
-audio = audiorecorder("Record", "Stop", key="audio")
-prompt = st.chat_input("What's up?", key="user_prompt")
+col1, col2 = st.columns([5, 1])
+with col1:
+    prompt = st.chat_input("What's up?", key="user_prompt")
+with col2:
+    audio = audiorecorder("Record", "Stop")
 
 final_prompt = None
-print("audio length = ", len(audio))
-print("final_prompt = ", final_prompt)
 if prompt:
     final_prompt = prompt
-elif len(audio) > 0:
+elif audio:
     print("audio recorded")
     # using deepgram to transcribe audio
     # add unique id to the audio file in case the user wants to keep it
@@ -68,10 +55,8 @@ elif len(audio) > 0:
 
     options: PrerecordedOptions = PrerecordedOptions(model="nova-2", smart_format=True)
 
-    response = deepgram.listen.rest.v("1").transcribe_file(
-        payload,
-        options,
-        # timeout=httpx.Timeout(300.0, connect=10.0)
+    response = deepgram.listen.prerecorded.v("1").transcribe_file(
+        payload, options, timeout=httpx.Timeout(300.0, connect=10.0)
     )
 
     # retrieve the fully punctuated response from the raw data
